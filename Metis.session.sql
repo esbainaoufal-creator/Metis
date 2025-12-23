@@ -39,4 +39,17 @@ CREATE TABLE long_projects (
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+--@block
+CREATE TABLE activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    status ENUM('in_progress', 'completed') NOT NULL,
+    activity_date DATETIME NOT NULL,
+    project_id INT NOT NULL,
+    CONSTRAINT fk_activity_project
+        FOREIGN KEY (project_id)
+        REFERENCES projects(id)
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
 
