@@ -18,3 +18,25 @@ CREATE TABLE projects (
         REFERENCES members(id)
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+
+--@block
+CREATE TABLE short_projects (
+    project_id INT PRIMARY KEY,
+    max_duration INT NOT NULL,
+    CONSTRAINT fk_short_project
+        FOREIGN KEY (project_id)
+        REFERENCES projects(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+--@block
+CREATE TABLE long_projects (
+    project_id INT PRIMARY KEY,
+    budget DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_long_project
+        FOREIGN KEY (project_id)
+        REFERENCES projects(id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+
