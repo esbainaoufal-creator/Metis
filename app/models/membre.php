@@ -31,11 +31,25 @@ class Membre extends baseModel
     }
     public function setEmail($email)
     {
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL))
-        {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception("Email invalide");
         }
         $this->email = $email;
     }
-
+    public function emailExists($email)
+    {
+        $sql = "SELECT COUNT(*) FROM membres WHERE email = :email"; // checks if email exists or not
+        $stmt = self::$db->prepare($sql);
+        $stmt->bindValue(':email', $email);
+        $stmt->execute();
+        $count = $stmt->fetchColumn();
+        return $count > 0;
+    }
+    public function save()
+    {
+        if ($this->emailExists($this->email)) {
+            throw new Exception("Email deja utilise");
+        }
+        parent::save();
+    }
 }
