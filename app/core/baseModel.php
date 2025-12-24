@@ -36,4 +36,11 @@ class baseModel
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]); //bind id to its placeholder :id
     }
+
+    public function findId($id){ //take the record ID as input
+        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
+        $stmt = $this->db->prepare($sql); //PREPARING SQL QUERY 
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC); //return the row as an associative array
+    }
 }
