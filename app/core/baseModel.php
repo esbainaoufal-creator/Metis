@@ -30,4 +30,10 @@ class baseModel
         $stmt = $this->db->prepare($sql);
         $stmt->execute($values);
     }
+
+    public function delete($id){ //public : accessible from child;
+        $sql = "DELETE FROM {$this->table} WHERE id = :id";// :id : PDO placeholder
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]); //bind id to its placeholder :id
+    }
 }
