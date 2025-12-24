@@ -1,5 +1,5 @@
 <?php
-abstract class Project extends baseModel
+abstract class Projet extends baseModel
 {
     private $id;
     private $title;
