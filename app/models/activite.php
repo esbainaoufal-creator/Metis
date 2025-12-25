@@ -50,6 +50,14 @@ class Activite extends BaseModel
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':id' => $id]);
     }
+    public function findByProjetId($projet_id)
+    {
+        $sql = "SELECT * FROM activites WHERE projet_id = :projet_id ORDER BY created_at ASC";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':projet_id' => $projet_id]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 //$activity = new Activite(5, "Projet créé");
 //echo $activity->getCreatedAt(); 
