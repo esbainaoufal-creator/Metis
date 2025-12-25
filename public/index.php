@@ -39,7 +39,7 @@ while (true) {
 
             echo "Membre ajouté avec succès !\n";
 
-            
+
             break;
 
         case "2":
@@ -51,6 +51,46 @@ while (true) {
             $projects = $projetModel->findAll(); // you will implement findAll() in Projet
             foreach ($projects as $project) {
                 echo "{$project['id']} - {$project['title']} ({$project['type']})\n";
+            }
+
+            $title = readline("Entrez le titre du projet: ");
+            $type = readline("Entrez le type de projet (court/long): ");
+
+            if ($type === "court") {
+                $projet = new ProjetCourt();
+            } else {
+                $projet = new ProjetLong();
+            }
+
+            $projet->setTitle($title);
+            $projet->save();
+
+            echo "Projet ajouté avec succès !\n";
+
+            $idToUpdate = readline("Entrez l'ID du projet à modifier: ");
+            $projet = new Projet();
+            $existing = $projet->findId($idToUpdate);
+
+            if ($existing) {
+                $newTitle = readline("Nouveau titre (laisser vide pour conserver '{$existing['title']}'): ");
+
+                if ($newTitle !== '') $projet->setTitle($newTitle);
+
+                $projet->save(); // implement update logic in save() or a separate update() method
+                echo "Projet mis à jour avec succès !\n";
+            } else {
+                echo "Projet introuvable.\n";
+            }
+
+            $idToDelete = readline("Entrez l'ID du projet à supprimer: ");
+            $projet = new Projet();
+            $activities = (new Activite())->findByProjetId($idToDelete);
+
+            if (!empty($activities)) {
+                echo "Impossible de supprimer le projet : il contient des activités.\n";
+            } else {
+                $projet->delete($idToDelete);
+                echo "Projet supprimé avec succès !\n";
             }
 
             break;
