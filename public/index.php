@@ -14,7 +14,7 @@ while (true) {
             require_once __DIR__ . '/../app/Models/Membre.php';
             echo "Liste des membres :\n";
             $membreModel = new Membre();
-            $members = $membreModel->findAll(); // you will implement findAll() in Membre
+            $members = $membreModel->findAll();
             foreach ($members as $member) {
                 echo "{$member['id']} - {$member['name']} ({$member['email']})\n";
             }
@@ -22,7 +22,15 @@ while (true) {
 
         case "2":
             echo "Gestion des projets sélectionnée.\n";
-            // TODO: call project management functions
+            require_once __DIR__ . '/../app/Models/Projet.php';
+
+            echo "Liste des projets :\n";
+            $projetModel = new Projet();
+            $projects = $projetModel->findAll(); // you will implement findAll() in Projet
+            foreach ($projects as $project) {
+                echo "{$project['id']} - {$project['title']} ({$project['type']})\n";
+            }
+
             break;
 
         case "3":
