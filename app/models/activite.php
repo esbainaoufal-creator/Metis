@@ -58,6 +58,7 @@ class Activite extends BaseModel
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
 }
 //$activity = new Activite(5, "Projet créé");
 //echo $activity->getCreatedAt(); 

@@ -29,6 +29,17 @@ while (true) {
 
             echo "Membre ajouté avec succès !\n";
 
+            $name = readline("Entrez le nom du membre: ");
+            $email = readline("Entrez l'email du membre: ");
+
+            $membre = new Membre();
+            $membre->setName($name);
+            $membre->setEmail($email);
+            $membre->save();
+
+            echo "Membre ajouté avec succès !\n";
+
+            
             break;
 
         case "2":
