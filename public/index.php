@@ -35,7 +35,15 @@ while (true) {
 
         case "3":
             echo "Gestion des activités sélectionnée.\n";
-            // TODO: call activity management functions
+            require_once __DIR__ . '/../app/Models/Activite.php';
+
+            echo "Liste des activités :\n";
+            $activityModel = new Activite();
+            $activities = $activityModel->findAll(); // you will implement findAll() in Activite
+            foreach ($activities as $activity) {
+                echo "{$activity['id']} - Projet ID: {$activity['projet_id']} - {$activity['description']} ({$activity['created_at']})\n";
+            }
+
             break;
 
         case "4":
