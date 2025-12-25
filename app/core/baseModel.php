@@ -1,5 +1,5 @@
 <?php
-class baseModel
+class BaseModel
 {
     protected $db; //stores the database object
     protected $table; // Name of the database table

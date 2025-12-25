@@ -1,5 +1,5 @@
 <?php
-class Membre extends baseModel
+class Membre extends BaseModel
 { //extends baseModel : receives all properties and methods from BaseModel
     private $id;
     private $name;

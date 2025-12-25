@@ -8,7 +8,7 @@ class Config
             'host' => 'localhost',
             'dbName' => 'project_manager',
             'username' => 'root',
-            'password' => ''
+            'password' => 'rif50'
         ];
     }
 }
