@@ -44,6 +44,12 @@ class Activite extends BaseModel
         $stmt->bindParam(':created_at', $this->created_at);
         $stmt->execute();
     }
+    public function delete($id)
+    {
+        $sql = "DELETE FROM activites WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':id' => $id]);
+    }
 }
 //$activity = new Activite(5, "Projet créé");
 //echo $activity->getCreatedAt(); 
