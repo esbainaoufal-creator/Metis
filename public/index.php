@@ -106,6 +106,43 @@ while (true) {
                 echo "{$activity['id']} - Projet ID: {$activity['projet_id']} - {$activity['description']} ({$activity['created_at']})\n";
             }
 
+            $projetId = readline("Entrez l'ID du projet associé: ");
+            $description = readline("Entrez la description de l'activité: ");
+
+            $activity = new Activite();
+            $activity->setProjetId($projetId);
+            $activity->setDescription($description);
+            $activity->setCreatedAt(date('Y-m-d H:i:s'));
+            $activity->save();
+
+            echo "Activité ajoutée avec succès !\n";
+
+            $idToUpdate = readline("Entrez l'ID de l'activité à modifier: ");
+            $activity = new Activite();
+            $existing = $activity->findId($idToUpdate);
+
+            if ($existing) {
+                $newDescription = readline("Nouvelle description (laisser vide pour conserver '{$existing['description']}'): ");
+
+                if ($newDescription !== '') $activity->setDescription($newDescription);
+
+                $activity->save(); // implement update logic in save() or a separate update() method
+                echo "Activité mise à jour avec succès !\n";
+            } else {
+                echo "Activité introuvable.\n";
+            }
+
+            $idToDelete = readline("Entrez l'ID de l'activité à supprimer: ");
+            $activity = new Activite();
+            $existing = $activity->findId($idToDelete);
+
+            if ($existing) {
+                $activity->delete($idToDelete);
+                echo "Activité supprimée avec succès !\n";
+            } else {
+                echo "Activité introuvable.\n";
+            }
+
             break;
 
         case "4":
