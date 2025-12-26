@@ -1,4 +1,10 @@
 <?php
+require_once __DIR__ . '/../app/database/database.php';
+require_once __DIR__ . '/../app/models/Membre.php';
+require_once __DIR__ . '/../app/models/ProjetCourt.php';
+require_once __DIR__ . '/../app/models/ProjetLong.php';
+require_once __DIR__ . '/../app/models/Activite.php';
+
 while (true) {
     echo "\n---- Menu CINEMA CLUB ----\n";
     echo "1. Gestion des membres\n";
@@ -9,146 +15,179 @@ while (true) {
     $choice = readline("Entrez votre choix: ");
 
     switch ($choice) {
+
+        // --- MEMBERS ---
         case "1":
-            echo "Gestion des membres sélectionnée.\n";
-            require_once __DIR__ . '/../app/Models/Membre.php';
-            echo "Liste des membres :\n";
             $membreModel = new Membre();
             $members = $membreModel->findAll();
+            echo "Liste des membres :\n";
             foreach ($members as $member) {
                 echo "{$member['id']} - {$member['name']} ({$member['email']})\n";
             }
 
-            $name = readline("Entrez le nom du membre: ");
-            $email = readline("Entrez l'email du membre: ");
+            $action = readline("Voulez-vous ajouter (a), modifier (m) ou supprimer (s) un membre? ");
 
-            $membre = new Membre();
-            $membre->setName($name);
-            $membre->setEmail($email);
-            $membre->save();
-
-            echo "Membre ajouté avec succès !\n";
-
-            $name = readline("Entrez le nom du membre: ");
-            $email = readline("Entrez l'email du membre: ");
-
-            $membre = new Membre();
-            $membre->setName($name);
-            $membre->setEmail($email);
-            $membre->save();
-
-            echo "Membre ajouté avec succès !\n";
-
-
+            if ($action === 'a') {
+                $name = readline("Nom: ");
+                $email = readline("Email: ");
+                $membre = new Membre();
+                $membre->setName($name);
+                $membre->setEmail($email);
+                $membre->save();
+                echo "Membre ajouté !\n";
+            } elseif ($action === 'm') {
+                $id = (int)readline("ID du membre à modifier: ");
+                $membre = new Membre();
+                $existing = $membre->findId($id);
+                if ($existing) {
+                    $newName = readline("Nouveau nom (laisser vide pour conserver '{$existing['name']}'): ");
+                    $newEmail = readline("Nouvel email (laisser vide pour conserver '{$existing['email']}'): ");
+                    $membre->setId($id);
+                    $membre->setName($newName !== '' ? $newName : $existing['name']);
+                    $membre->setEmail($newEmail !== '' ? $newEmail : $existing['email']);
+                    $membre->save();
+                    echo "Membre modifié !\n";
+                } else {
+                    echo "Membre introuvable.\n";
+                }
+            } elseif ($action === 's') {
+                $id = (int)readline("ID du membre à supprimer: ");
+                $membre = new Membre();
+                $membre->delete($id);
+                echo "Membre supprimé !\n";
+            }
             break;
 
+        // --- PROJECTS ---
         case "2":
-            echo "Gestion des projets sélectionnée.\n";
-            require_once __DIR__ . '/../app/Models/Projet.php';
-
+            // merge ProjetCourt + ProjetLong
+            $projects = array_merge(
+                (new ProjetCourt())->findAll(),
+                (new ProjetLong())->findAll()
+            );
             echo "Liste des projets :\n";
-            $projetModel = new Projet();
-            $projects = $projetModel->findAll(); // you will implement findAll() in Projet
             foreach ($projects as $project) {
-                echo "{$project['id']} - {$project['title']} ({$project['type']})\n";
+                echo "{$project['id']} - {$project['title']} ({$project['member_id']})\n";
             }
 
-            $title = readline("Entrez le titre du projet: ");
-            $type = readline("Entrez le type de projet (court/long): ");
+            $action = readline("Voulez-vous ajouter (a), modifier (m) ou supprimer (s) un projet? ");
 
-            if ($type === "court") {
-                $projet = new ProjetCourt();
-            } else {
-                $projet = new ProjetLong();
+            if ($action === 'a') {
+                $title = readline("Titre du projet: ");
+                $type = readline("Type de projet (court/long): ");
+
+                // select member
+                $members = (new Membre())->findAll();
+                foreach ($members as $member) {
+                    echo "{$member['id']} - {$member['name']}\n";
+                }
+                $memberId = (int)readline("ID du membre responsable: ");
+
+                if ($type === 'court') $projet = new ProjetCourt();
+                else $projet = new ProjetLong();
+
+                $projet->setTitle($title);
+                $projet->setMemberId($memberId);
+                $projet->save();
+                echo "Projet ajouté !\n";
+
+            } elseif ($action === 'm') {
+                $id = (int)readline("ID du projet à modifier: ");
+                $existing = null;
+                foreach ($projects as $p) {
+                    if ($p['id'] === $id) {
+                        $existing = $p;
+                        break;
+                    }
+                }
+                if ($existing) {
+                    $newTitle = readline("Nouveau titre (laisser vide pour conserver '{$existing['title']}'): ");
+                    $projet = ($existing['type'] === 'court') ? new ProjetCourt() : new ProjetLong();
+                    $projet->setId($id);
+                    $projet->setTitle($newTitle !== '' ? $newTitle : $existing['title']);
+                    $projet->setMemberId($existing['member_id']);
+                    $projet->save();
+                    echo "Projet modifié !\n";
+                } else {
+                    echo "Projet introuvable.\n";
+                }
+            } elseif ($action === 's') {
+                $id = (int)readline("ID du projet à supprimer: ");
+                $activities = (new Activite())->findByProjetId($id);
+                if (!empty($activities)) {
+                    echo "Impossible de supprimer : le projet contient des activités.\n";
+                } else {
+                    $projet = new ProjetCourt(); // temp delete, type doesn't matter here
+                    $projet->delete($id);
+                    echo "Projet supprimé !\n";
+                }
             }
-
-            $projet->setTitle($title);
-            $projet->save();
-
-            echo "Projet ajouté avec succès !\n";
-
-            $idToUpdate = readline("Entrez l'ID du projet à modifier: ");
-            $projet = new Projet();
-            $existing = $projet->findId($idToUpdate);
-
-            if ($existing) {
-                $newTitle = readline("Nouveau titre (laisser vide pour conserver '{$existing['title']}'): ");
-
-                if ($newTitle !== '') $projet->setTitle($newTitle);
-
-                $projet->save(); // implement update logic in save() or a separate update() method
-                echo "Projet mis à jour avec succès !\n";
-            } else {
-                echo "Projet introuvable.\n";
-            }
-
-            $idToDelete = readline("Entrez l'ID du projet à supprimer: ");
-            $projet = new Projet();
-            $activities = (new Activite())->findByProjetId($idToDelete);
-
-            if (!empty($activities)) {
-                echo "Impossible de supprimer le projet : il contient des activités.\n";
-            } else {
-                $projet->delete($idToDelete);
-                echo "Projet supprimé avec succès !\n";
-            }
-
             break;
 
+        // --- ACTIVITIES ---
         case "3":
-            echo "Gestion des activités sélectionnée.\n";
-            require_once __DIR__ . '/../app/Models/Activite.php';
-
-            echo "Liste des activités :\n";
             $activityModel = new Activite();
-            $activities = $activityModel->findAll(); // you will implement findAll() in Activite
+            $activities = $activityModel->findAll();
+            echo "Liste des activités :\n";
             foreach ($activities as $activity) {
                 echo "{$activity['id']} - Projet ID: {$activity['projet_id']} - {$activity['description']} ({$activity['created_at']})\n";
             }
 
-            $projetId = readline("Entrez l'ID du projet associé: ");
-            $description = readline("Entrez la description de l'activité: ");
+            $action = readline("Voulez-vous ajouter (a), modifier (m) ou supprimer (s) une activité? ");
 
-            $activity = new Activite();
-            $activity->setProjetId($projetId);
-            $activity->setDescription($description);
-            $activity->setCreatedAt(date('Y-m-d H:i:s'));
-            $activity->save();
+            if ($action === 'a') {
+                // merge all projects
+                $projects = array_merge(
+                    (new ProjetCourt())->findAll(),
+                    (new ProjetLong())->findAll()
+                );
 
-            echo "Activité ajoutée avec succès !\n";
+                foreach ($projects as $p) {
+                    echo "{$p['id']} - {$p['title']}\n";
+                }
 
-            $idToUpdate = readline("Entrez l'ID de l'activité à modifier: ");
-            $activity = new Activite();
-            $existing = $activity->findId($idToUpdate);
+                $projetId = (int)readline("ID du projet associé: ");
 
-            if ($existing) {
-                $newDescription = readline("Nouvelle description (laisser vide pour conserver '{$existing['description']}'): ");
+                $existingProject = null;
+                foreach ($projects as $p) {
+                    if ($p['id'] === $projetId) {
+                        $existingProject = $p;
+                        break;
+                    }
+                }
+                if (!$existingProject) {
+                    echo "Erreur : projet introuvable. Créez le projet avant d'ajouter une activité.\n";
+                    break;
+                }
 
-                if ($newDescription !== '') $activity->setDescription($newDescription);
+                $description = readline("Description: ");
+                $activity = new Activite($projetId, $description);
+                $activity->save();
+                echo "Activité ajoutée !\n";
 
-                $activity->save(); // implement update logic in save() or a separate update() method
-                echo "Activité mise à jour avec succès !\n";
-            } else {
-                echo "Activité introuvable.\n";
+            } elseif ($action === 'm') {
+                $id = (int)readline("ID de l'activité à modifier: ");
+                $existing = $activityModel->findId($id);
+                if ($existing) {
+                    $newDesc = readline("Nouvelle description (laisser vide pour conserver '{$existing['description']}'): ");
+                    $activity = new Activite($existing['projet_id'], $newDesc !== '' ? $newDesc : $existing['description']);
+                    $activity->setId($id);
+                    $activity->save();
+                    echo "Activité modifiée !\n";
+                } else {
+                    echo "Activité introuvable.\n";
+                }
+            } elseif ($action === 's') {
+                $id = (int)readline("ID de l'activité à supprimer: ");
+                $activity = new Activite(1, ""); // temporary
+                $activity->delete($id);
+                echo "Activité supprimée !\n";
             }
-
-            $idToDelete = readline("Entrez l'ID de l'activité à supprimer: ");
-            $activity = new Activite();
-            $existing = $activity->findId($idToDelete);
-
-            if ($existing) {
-                $activity->delete($idToDelete);
-                echo "Activité supprimée avec succès !\n";
-            } else {
-                echo "Activité introuvable.\n";
-            }
-
             break;
 
         case "4":
             echo "Au revoir !\n";
-            exit; // stops the script
-            break;
+            exit;
 
         default:
             echo "Choix invalide, réessayez.\n";

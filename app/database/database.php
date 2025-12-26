@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../config/config.php';
+
 
 class Database
 {
@@ -11,8 +13,9 @@ class Database
 
         try {
             $this->connection = new PDO(
-                "mysql:host={$config['host']};dbname={$config['dbName']};charset=utf8",
-                $config['username'],
+                "mysql:host={$config['host']};
+                dbname={$config['dbName']};
+                charset=utf8",$config['username'],
                 $config['password']
             );
 

@@ -1,12 +1,13 @@
 <?php
 
+
 class Config
 {
     public static function database()
     {
         return [
             'host' => 'localhost',
-            'dbName' => 'project_manager',
+            'dbName' => 'metis',
             'username' => 'root',
             'password' => 'rif50'
         ];

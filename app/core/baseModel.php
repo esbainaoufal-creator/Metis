@@ -1,46 +1,31 @@
 <?php
 class BaseModel
 {
-    protected $db; //stores the database object
-    protected $table; // Name of the database table
+    protected $db;
+    protected $table;
+
     public function __construct()
     {
-        $this->db = Database::getInstance()->getConnection(); // Get the single PDO connection from Database singleton
+        $this->db = new PDO("mysql:host=localhost;dbname=metis", "root", "rif50");
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    public function save()
+    public function findAll()
     {
-        // TODO : Build SQL insert query here
-        $props = get_object_vars($this);
-        $columns = [];
-        $placeholders = [];
-        $values = [];
-        foreach ($props as $key => $value) //loop throught all object properties
-        {
-            if ($key === 'db' || $key === 'table') continue;
-
-            $columns[] = $key; //add the name prop as a column for sql
-            $placeholders[] = ":$key"; //add PDO placeholder for prepared statement
-            $values[":$key"] = $value; //Store the actual value to bind to the statement
-        }
-
-        $sql = "INSERT INTO {$this->table} (" . implode(',', $columns) . ")
-        VALUES (" . implode(',', $placeholders) . ")";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($values);
+        $stmt = $this->db->query("SELECT * FROM {$this->table}");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function delete($id){ //public : accessible from child;
-        $sql = "DELETE FROM {$this->table} WHERE id = :id";// :id : PDO placeholder
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $id]); //bind id to its placeholder :id
+    public function findId($id)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM {$this->table} WHERE id=?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function findId($id){ //take the record ID as input
-        $sql = "SELECT * FROM {$this->table} WHERE id = :id";
-        $stmt = $this->db->prepare($sql); //PREPARING SQL QUERY 
-        $stmt->execute([':id' => $id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC); //return the row as an associative array
+    public function delete($id)
+    {
+        $stmt = $this->db->prepare("DELETE FROM {$this->table} WHERE id=?");
+        return $stmt->execute([$id]);
     }
 }

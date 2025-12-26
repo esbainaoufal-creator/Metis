@@ -51,5 +51,22 @@ CREATE TABLE activities (
         REFERENCES projects(id)
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
+--@block
+ALTER TABLE activities
+ADD COLUMN projet_id INT NOT NULL,
+ADD CONSTRAINT fk_activities_projet
+FOREIGN KEY (project_id) REFERENCES projects(id)
+ON DELETE CASCADE;
+
+--@block
+ALTER TABLE activities
+ADD COLUMN description TEXT NOT NULL;
+
+--@block
+ALTER TABLE activities
+ADD COLUMN created_at DATETIME NOT NULL;
+
+--@block
+SELECT * FROM projects;
 
 
